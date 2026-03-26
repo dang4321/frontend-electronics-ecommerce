@@ -23,7 +23,7 @@ const ListLastestReviews = () => {
         const response = await axios.get(REVIEW_API_URL);
         setReviews(response.data.data || []);
       } catch (err) {
-        setError('Unable to load reviews. Please try again.');
+        setError('Không thể tải đánh giá. Vui lòng thử lại.');
         console.error('Error fetching reviews:', err);
       } finally {
         setLoading(false);
@@ -79,10 +79,10 @@ const ListLastestReviews = () => {
         {reviews.length > 0 ? (
           reviews.map(renderReview)
         ) : !loading && !error ? (
-          <p className={`${styles['no-reviews']} text-center col-12`}>No reviews to display.</p>
+          <p className={`${styles['no-reviews']} text-center col-12`}>không có đánh giá nào để hiển thị.</p>
         ) : null}
       </div>
-      {loading && <div className={`${styles.loading} text-center mt-4`}>Loading...</div>}
+      {loading && <div className={`${styles.loading} text-center mt-4`}>Đang tải...</div>}
       {error && <div className={`${styles.error} text-center mt-4 text-danger`}>{error}</div>}
     </section>
   );
