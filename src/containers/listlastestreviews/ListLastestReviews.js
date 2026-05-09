@@ -11,11 +11,8 @@ const ListLastestReviews = () => {
 
   // Lấy URL trực tiếp từ biến môi trường
   const API_URL = process.env.REACT_APP_BACKEND_URL;
-
-  // Endpoint API sử dụng biến môi trường
   const REVIEW_API_URL = `${API_URL}/api/v1/latestreviews`;
 
-  // Fetch latest reviews
   useEffect(() => {
     const fetchReviews = async () => {
       setLoading(true);
@@ -23,7 +20,7 @@ const ListLastestReviews = () => {
         const response = await axios.get(REVIEW_API_URL);
         setReviews(response.data.data || []);
       } catch (err) {
-        setError('Không thể tải đánh giá. Vui lòng thử lại.');
+        setError('Unable to load reviews. Please try again.');
         console.error('Error fetching reviews:', err);
       } finally {
         setLoading(false);
@@ -34,16 +31,15 @@ const ListLastestReviews = () => {
   }, [REVIEW_API_URL]);
 
   const renderReview = (review) => (
-    <div className="col-lg-3 col-md-6 col-12 mb-4" key={review.review_id}>
+    <div className="col-lg-3 col-md-6 col-12 mb-4 d-flex align-items-stretch" key={review.review_id}>
       <Link
-        className={styles['review-card']}
+        className={`${styles['review-card']} w-100`}
         to={`/detailproduct/${review.product_id}`}
         aria-label={`View product ${review.Product.name}`}
       >
         <div className={styles['review-content']}>
           <div className={styles['review-header']}>
             <img
-              // Thay thế localhost bằng API_URL cho ảnh đại diện user
               src={review.User.avatar ? `${API_URL}/images/useravatar/${review.User.avatar}` : dfavatar}
               alt={`Avatar of ${review.User.username}`}
               className={styles.avatar}
@@ -63,7 +59,10 @@ const ListLastestReviews = () => {
               </div>
             </div>
           </div>
+          {/* Bình luận luôn hiển thị đầy đủ */}
           <p className={styles.comment}>{review.comment || 'No comment provided.'}</p>
+          
+          {/* Tên sản phẩm tự động neo ở dưới đáy */}
           <p className={styles['product-name']}>{review.Product.name}</p>
         </div>
       </Link>
@@ -79,10 +78,10 @@ const ListLastestReviews = () => {
         {reviews.length > 0 ? (
           reviews.map(renderReview)
         ) : !loading && !error ? (
-          <p className={`${styles['no-reviews']} text-center col-12`}>không có đánh giá nào để hiển thị.</p>
+          <p className={`${styles['no-reviews']} text-center col-12`}>No reviews to display.</p>
         ) : null}
       </div>
-      {loading && <div className={`${styles.loading} text-center mt-4`}>Đang tải...</div>}
+      {loading && <div className={`${styles.loading} text-center mt-4`}>Loading...</div>}
       {error && <div className={`${styles.error} text-center mt-4 text-danger`}>{error}</div>}
     </section>
   );
