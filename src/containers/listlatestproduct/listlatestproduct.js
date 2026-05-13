@@ -10,7 +10,7 @@ const ListLastestProduct = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [hasMore, setHasMore] = useState(true);
-  const limit = 4; // Fetch 4 products per page
+  const limit = 8; 
 
   // Lấy URL trực tiếp từ biến môi trường
   const BASE_URL = process.env.REACT_APP_BACKEND_URL;
