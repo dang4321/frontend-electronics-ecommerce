@@ -161,6 +161,15 @@ const Login = () => {
                 <Link className={location.pathname === '/register' ? styles.active : ''} to="/register">ĐĂNG KÝ</Link>
               </div>
 
+              {/* Bảng thông báo tài khoản Demo */}
+              <div className={styles.demoInfo}>
+                <p className="mb-1">Trang web Demo - Tài khoản trải nghiệm:</p>
+                <p className="mb-0">
+                  Tài khoản: <strong>demo</strong> <br/>
+                  Mật khẩu: <strong>123456789</strong>
+                </p>
+              </div>
+
               <form onSubmit={handleLogin}>
                 <div className="mb-3">
                   <input

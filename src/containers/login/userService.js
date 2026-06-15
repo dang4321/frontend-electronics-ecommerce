@@ -36,7 +36,6 @@ export const setupAxiosInterceptors = (navigate, logoutContext) => {
         (config) => {
             const token = getAccessToken();
             if (token) {
-                // Tự động ghi đè Authorization header (Cứu code cũ của bạn)
                 config.headers.Authorization = `Bearer ${token}`;
             }
             return config;
@@ -49,11 +48,14 @@ export const setupAxiosInterceptors = (navigate, logoutContext) => {
         (response) => response,
         async (error) => {
             const originalRequest = error.config;
+            
+            // 👇 ĐÃ SỬA: Thêm điều kiện !originalRequest.url.includes('/refresh-token')
             if (
                 error.response &&
                 error.response.status === 401 &&
                 !originalRequest._retry &&
-                !originalRequest.url.includes('/login')
+                !originalRequest.url.includes('/login') &&
+                !originalRequest.url.includes('/refresh-token') 
             ) {
                 originalRequest._retry = true;
 
@@ -70,6 +72,7 @@ export const setupAxiosInterceptors = (navigate, logoutContext) => {
 
                 isRefreshing = true;
                 try {
+                    // Gọi API xin token mới
                     const response = await axios.get(`${API_URL}/api/v1/refresh-token`, {
                         withCredentials: true,
                     });
@@ -78,17 +81,22 @@ export const setupAxiosInterceptors = (navigate, logoutContext) => {
                     
                     // Cập nhật lại Storage với token mới
                     const userData = localStorage.getItem('user') || sessionStorage.getItem('user');
-                    const bytes = CryptoJS.AES.decrypt(userData, SECRET_KEY);
-                    const user = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-                    
-                    const updatedUser = { ...user, accessToken, auth: true };
-                    const storage = localStorage.getItem('user') ? localStorage : sessionStorage;
-                    storage.setItem('user', CryptoJS.AES.encrypt(JSON.stringify(updatedUser), SECRET_KEY).toString());
+                    if (userData) {
+                        const bytes = CryptoJS.AES.decrypt(userData, SECRET_KEY);
+                        const user = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+                        
+                        const updatedUser = { ...user, accessToken, auth: true };
+                        const storage = localStorage.getItem('user') ? localStorage : sessionStorage;
+                        storage.setItem('user', CryptoJS.AES.encrypt(JSON.stringify(updatedUser), SECRET_KEY).toString());
+                    }
 
                     processQueue(null, accessToken);
                     originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+                    
+                    // Chạy lại request đang bị kẹt
                     return axios(originalRequest);
                 } catch (refreshError) {
+                    // 👇 ĐÃ SỬA: Nếu xin Refresh Token cũng lỗi (VD: Quá 7 ngày), thì ép đăng xuất
                     processQueue(refreshError, null);
                     if (logoutContext) logoutContext();
                     navigate('/login');
